@@ -1,0 +1,88 @@
+#include<iostream>
+#include<fstream>
+using namespace std;
+
+int main(int argc, char* argv[]) {
+	if (argc != 4) {
+		cout << "Usage: ./a.out block_size input_filename output_filename" << endl;
+		cout << "If block_size is 0, then naive algorithm is used" << endl;
+		exit(0);
+	}
+
+	int block_size = atoi(argv[1]);
+
+	// Open the input and output files
+	string infile_name(argv[2]), outfile_name(argv[3]);
+	ofstream outfile;
+	outfile.open(outfile_name, ios::out | ios::trunc);
+	if (!outfile.is_open()) {
+		cout << "Error: Cannot open file " << outfile_name << " for writing" << endl;
+		exit(0);
+	}
+	ifstream infile;
+	infile.open(infile_name, ios::in);
+	if (!infile.is_open()) {
+		cout << "Error: Cannot open file " << infile_name << " for reading" << endl;
+		exit(0);
+	}
+
+	int n;
+	infile >> n;
+
+	int a[n][n], b[n][n], c[n][n];
+
+	// Read the two matrices from input file
+	for(int i=0; i<n; i++) {
+		for (int j=0; j<n; j++) {
+			infile >> a[i][j];
+		}
+	}
+	for(int i=0; i<n; i++) {
+		for (int j=0; j<n; j++) {
+			infile >> b[i][j];
+			c[i][j] = 0;
+		}
+	}
+
+	// Choose the algorithm to use based on value of block size
+	if (block_size == 0) {
+		for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < n; j++)
+            {
+                for(int k = 0; k < n; k++)
+                {
+                    c[i][j] += a[i][k]*b[k][j];
+                }
+            }
+        }
+	} else {
+		for(int i1 = 0; i1 < n/block_size; i1++)
+        {
+            for(int j1 = 0; j1 < n/block_size; j1++)
+            {
+                for(int k1 = 0; k1 < n/block_size; k1++)
+                {
+                    for(int i2 = 0; i2 < block_size; i2++)
+                    {
+                        for(int j2 = 0; j2 < block_size; j2++)
+                        {
+                            for(int k2 = 0; k2 < block_size; k2++)
+                            {
+                                c[i1*block_size + i2][j1*block_size + j2] += a[i1*block_size + i2][k1*block_size + k2]*b[k1*block_size + k2][j1*block_size + j2];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+	}
+
+	// Write the output matrix
+	for(int i=0; i<n; i++) {
+		for (int j=0; j<n; j++) {
+			outfile << c[i][j] << " ";
+		}
+		outfile << endl;
+	}
+}
